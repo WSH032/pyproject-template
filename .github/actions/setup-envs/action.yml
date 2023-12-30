@@ -1,0 +1,95 @@
+# WARNING: Do not change the name of this folder, keep `setup-envs`.
+# other workflows need the name of the action to work.
+
+# https://docs.github.com/actions/using-workflows/caching-dependencies-to-speed-up-workflows#restrictions-for-accessing-a-cache
+
+name: "Setup deps envs"
+description: |
+  Setup and cache deps envs for hatch and pre-commit.
+  will:
+      `pip install -r requirements.txt -U`
+      cache hatch venv
+      cache pre-commit venv
+  NOTE: `setup-python` first.
+
+inputs:
+  python-version:
+    description: "steps.setup-python.outputs.python-version"
+    required: true
+  python-path:
+    description: "steps.setup-python.outputs.python-path"
+    required: true
+  cache:
+    description: "Whether to use cache; set `true` to use cache"
+    default: "false"
+    required: false
+
+outputs:
+  hatch-cache-hit:
+    description: "hatch venv cache hit"
+    value: ${{ steps.cache-hatch-venv.outputs.cache-hit }}
+  pre-commit-cache-hit:
+    description: "pre-commit venv cache hit"
+    value: ${{ steps.cache-pre-commit-venv.outputs.cache-hit }}
+
+runs:
+  using: composite
+  steps:
+    # pip install hatch and pre-commit
+    - name: Install dependencies
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements.txt -U
+        python -m pip freeze --local
+
+    # cache hatch venv
+    - name: cache hatch venv
+      id: cache-hatch-venv
+      if: ${{ inputs.cache == 'true' }}
+      uses: actions/cache@v3
+      env:
+        CACHE_VERSION: v1
+      with:
+        # Don't cache `.venv-default`, re-creat it instead.
+        # Because we can't use `==` to constraint the version of deps,
+        # resulting in cache not being up-to-date
+        path: |
+          ./.venv-docs
+          ./.venv-fmt
+        key:
+          # `v1` is the version of this cache key
+          "\
+          hatch-venv-\
+          ${{ runner.os }}-\
+          ${{ env.CACHE_VERSION }}-\
+          python${{ inputs.python-version }}-\
+          ${{ inputs.python-path }}-\
+          ${{ hashFiles('pyproject.toml', 'requirements.txt') }}\
+          "
+        restore-keys:
+          hatch-venv-${{ runner.os }}-
+
+    # cache pre-commit venv
+    # ref: https://github.com/pre-commit/action/blob/c7d159c2092cbfaab7352e2d8211ab536aa2267c/action.yml
+    #      https://pre-commit.com/#github-actions-example
+    - name: cache pre-commit venv
+      uses: actions/cache@v3
+      id: cache-pre-commit-venv
+      if: ${{ inputs.cache == 'true' }}
+      env:
+        CACHE_VERSION: v1
+      with:
+        path: ~/.cache/pre-commit
+        key:
+          # `v1` is the version of this cache key
+          "\
+          pre-commit-3-\
+          ${{ runner.os }}-\
+          ${{ env.CACHE_VERSION }}-\
+          python${{ inputs.python-version }}-\
+          ${{ inputs.python-path }}-\
+          ${{ hashFiles('.pre-commit-config.yaml') }}\
+          "
+        restore-keys:
+          pre-commit-3-${{ runner.os }}-
