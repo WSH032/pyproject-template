@@ -98,7 +98,8 @@ runs:
     # We don't create `docs` env, because it's not used in pre-commit hooks
     - name: create hatch venv
       shell: bash
+      # NOTE: Do not run `hatch shell <env>` to enter another shell,
+      #     wiil crash github workflow on ubuntu
       run: |
         hatch env create default
         hatch env create fmt
-        hatch shell default
