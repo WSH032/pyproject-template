@@ -31,15 +31,22 @@ Then, initialize the env with:
 
 ```shell
 # https://hatch.pypa.io/latest/environment/
-# Note: Create hatch venv before running pre-commit
+# IMPORTANT: Create hatch venv before running pre-commit
 hatch env create default
 hatch env create fmt
-hatch shell default
+hatch env create docs
+
+# IMPORTANT: init pyright-python before running pre-commit
+#     issue: https://github.com/RobertCraigie/pyright-python/issues/200
+hatch run default:pyright --help
 
 # Init pre-commit
 # https://pre-commit.com/#3-install-the-git-hook-scripts
 pre-commit install
 pre-commit run --all-files
+
+# enter the dev environment
+hatch shell default
 ```
 
 That's all! Now, you can start to develop.
