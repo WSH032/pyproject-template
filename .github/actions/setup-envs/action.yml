@@ -51,6 +51,9 @@ runs:
       env:
         CACHE_VERSION: v1
       with:
+        # FIXME: cache `.venv-default` may cause some problems
+        #     see: https://github.com/pypa/hatch/issues/771,
+        #     i don't know whether `pip install -e . --no-deps` can fix this problem ?
         path: |
           ./.venv-docs
           ./.venv-fmt
@@ -87,9 +90,12 @@ runs:
     #     read `#Environment setup` in `CONTRIBUTING.md` for more info
     - name: create hatch venv
       shell: bash
+      # IMPORTANT, FIXME: must re-install `. -e -U` again
+      #     issue: https://github.com/pypa/hatch/issues/771
       run: |
         for i in {1..100}; do echo -n "="; done; echo
         hatch env create default
+        hatch run default:pip install -e . --no-deps
         hatch run default:pip freeze --local
 
         for i in {1..100}; do echo -n "="; done; echo
