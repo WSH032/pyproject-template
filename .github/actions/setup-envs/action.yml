@@ -3,6 +3,10 @@
 
 # https://docs.github.com/actions/using-workflows/caching-dependencies-to-speed-up-workflows#restrictions-for-accessing-a-cache
 
+# If need clear cache
+#     refer to: https://docs.github.com/zh/actions/using-workflows/caching-dependencies-to-speed-up-workflows#managing-caches
+#     run `gh cache delete --all`
+
 name: "Setup deps envs"
 description: |
   Setup and cache deps envs for hatch and pre-commit.
