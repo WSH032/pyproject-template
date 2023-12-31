@@ -103,3 +103,9 @@ runs:
       run: |
         hatch env create default
         hatch env create fmt
+    - name: |
+        init pyright-python to avoid `npm ERR! code ENOTEMPTY`
+            Issue: https://github.com/RobertCraigie/pyright-python/issues/200
+      shell: bash
+      run: |
+        hatch run pyright --help
