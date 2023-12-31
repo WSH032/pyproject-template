@@ -29,15 +29,11 @@ jobs:
         with:
           # NOTE: Do not use cache, create a new environment is better.
           python-version: "3.10"
-      # setup and cache envs
-      - name: setup and cache envs
-        id: setup-envs
-        uses: ./.github/actions/setup-envs
-        with:
-          python-version: ${{ steps.setup-python.outputs.python-version }}
-          python-path: ${{ steps.setup-python.outputs.python-path }}
-          # NOTE: Do not use cache, create a new environment is better.
-          cache: false
+      # NOTE: Do not use `setup-envs` action, create a new environment is better.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install hatch -U
 
       - name: Build a binary wheel and a source tarball
         run: |

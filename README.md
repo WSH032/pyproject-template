@@ -15,7 +15,7 @@
 1. 按照 `CONTRIBUTING.md` 初始化项目
 2. 修改所有带有 `EDIT` 注释的地方
 3. 将 `github仓库设置`，`环境变量机密`，`保护规则` 设置得和本仓库（`pyproject-template`）完全一致
-4. 申请`codecov`和`pre-commit.ci`的BOT APP
+4. 申请[codecov](https://app.codecov.io/gh/)和[pre-commit.ci](https://results.pre-commit.ci/)的BOT APP
 5. 按照[pypa](https://packaging.python.org/en/latest/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/)的指南去 `pypi` 申请 `Trusted Publisher`
 6. 同步个人的`VSCode`设置和扩展
 7. 删掉本用法部分

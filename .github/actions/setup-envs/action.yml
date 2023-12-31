@@ -8,9 +8,9 @@ description: |
   Setup and cache deps envs for hatch and pre-commit.
   will:
       `pip install -r requirements.txt -U`
-      cache hatch venv
-      cache pre-commit venv
-  NOTE: `setup-python` first.
+      create and cache hatch venv
+      create and cache pre-commit venv
+  NOTE: use `setup-python` first
 
 inputs:
   python-version:
@@ -51,27 +51,23 @@ runs:
       env:
         CACHE_VERSION: v1
       with:
-        # Don't cache `.venv-default`, re-creat it instead.
-        # Because we can't use `==` to constraint the version of deps,
-        # resulting in cache not being up-to-date
+        # FIXME: cache `.venv-default` may cause some problems
+        #     see: https://github.com/pypa/hatch/issues/771,
+        #     i don't know whether `pip install -e . --no-deps` can fix this problem ?
         path: |
           ./.venv-docs
           ./.venv-fmt
-        key:
-          # `v1` is the version of this cache key
-          "\
-          hatch-venv-\
-          ${{ runner.os }}-\
-          ${{ env.CACHE_VERSION }}-\
+          ./.venv-default
+        key: "\
+          hatch-venv-${{ runner.os }}-${{ env.CACHE_VERSION }}-\
           python${{ inputs.python-version }}-\
           ${{ inputs.python-path }}-\
           ${{ hashFiles('pyproject.toml', 'requirements.txt') }}\
           "
-        restore-keys:
-          hatch-venv-${{ runner.os }}-
+        restore-keys: hatch-venv-${{ runner.os }}-${{ env.CACHE_VERSION }}-
 
     # cache pre-commit venv
-    # ref: https://github.com/pre-commit/action/blob/c7d159c2092cbfaab7352e2d8211ab536aa2267c/action.yml
+    # modified from: https://github.com/pre-commit/action/blob/c7d159c2092cbfaab7352e2d8211ab536aa2267c/action.yml
     #      https://pre-commit.com/#github-actions-example
     - name: cache pre-commit venv
       uses: actions/cache@v3
@@ -81,15 +77,46 @@ runs:
         CACHE_VERSION: v1
       with:
         path: ~/.cache/pre-commit
-        key:
-          # `v1` is the version of this cache key
-          "\
-          pre-commit-3-\
-          ${{ runner.os }}-\
-          ${{ env.CACHE_VERSION }}-\
+        key: "\
+          pre-commit-3-${{ runner.os }}-${{ env.CACHE_VERSION }}-\
           python${{ inputs.python-version }}-\
           ${{ inputs.python-path }}-\
           ${{ hashFiles('.pre-commit-config.yaml') }}\
           "
-        restore-keys:
-          pre-commit-3-${{ runner.os }}-
+        restore-keys: pre-commit-3-${{ runner.os }}-${{ env.CACHE_VERSION }}-
+
+    # Create hatch venv
+    # required before first running of pre-commit local system hooks,
+    #     read `#Environment setup` in `CONTRIBUTING.md` for more info
+    - name: create hatch venv
+      shell: bash
+      # IMPORTANT, FIXME: must re-install `. -e -U` again
+      #     issue: https://github.com/pypa/hatch/issues/771
+      run: |
+        for i in {1..100}; do echo -n "="; done; echo
+        hatch env create default
+        hatch run default:pip install -e . --no-deps
+        hatch run default:pip freeze --local
+
+        for i in {1..100}; do echo -n "="; done; echo
+        hatch env create fmt
+        hatch run fmt:pip freeze --local
+
+        for i in {1..100}; do echo -n "="; done; echo
+        hatch env create docs
+        hatch run docs:pip freeze --local
+
+    # init pyright-python to avoid `npm ERR! code ENOTEMPTY`
+    #     Issue: https://github.com/RobertCraigie/pyright-python/issues/200
+    - name: init pyright-python
+      shell: bash
+      # Ignore warnings to improve performance
+      #     https://github.com/RobertCraigie/pyright-python?tab=readme-ov-file#ignore-warnings
+      # Set env var in github workflow
+      #     ref: https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-of-writing-an-environment-variable-to-github_env
+      run: |
+        echo "PYRIGHT_PYTHON_IGNORE_WARNINGS=1" >> "$GITHUB_ENV"
+        hatch run default:pyright --help
+
+    # NOTE: Do not run `hatch shell <env>` to enter another shell,
+    #     which wiil crash github workflow on ubuntu

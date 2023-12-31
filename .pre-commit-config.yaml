@@ -34,13 +34,13 @@ repos:
         name: python format check
         language: system
         entry: hatch run fmt:fmt-check
-        types: [python]
+        # types: [python] # DO NOT set `types`, beacuse `pyproject.toml` is not included in `types: [python]`
       - id: type-check
         stages: [pre-commit]
         name: python type check
         language: system
         entry: hatch run type-check
-        types: [python]
+        # types: [python] # DO NOT set `types`, beacuse `pyproject.toml` is not included in `types: [python]`
 
 ci:
   # NOTE: skip all local system hooks

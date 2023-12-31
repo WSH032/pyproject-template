@@ -40,8 +40,8 @@ jobs:
       - name: Lint check and type check
         # keep the hook name consistent with `ci.skip` in `.pre-commit-config.yaml`
         run: |
-          pre-commit run type-check
-          pre-commit run fmt-check
+          pre-commit run fmt-check -a
+          pre-commit run type-check -a
 
   test:
     runs-on: ${{ matrix.os }}
