@@ -67,8 +67,7 @@ runs:
           ${{ inputs.python-path }}-\
           ${{ hashFiles('pyproject.toml', 'requirements.txt') }}\
           "
-        restore-keys:
-          hatch-venv-${{ runner.os }}-
+        restore-keys: hatch-venv-${{ runner.os }}-
 
     # cache pre-commit venv
     # ref: https://github.com/pre-commit/action/blob/c7d159c2092cbfaab7352e2d8211ab536aa2267c/action.yml
@@ -91,5 +90,15 @@ runs:
           ${{ inputs.python-path }}-\
           ${{ hashFiles('.pre-commit-config.yaml') }}\
           "
-        restore-keys:
-          pre-commit-3-${{ runner.os }}-
+        restore-keys: pre-commit-3-${{ runner.os }}-
+
+    # Create hatch venv
+    # required by first running of pre-commit local system hooks,
+    #     read `#Environment setup` in `CONTRIBUTING.md` for more info
+    # We don't create `docs` env, because it's not used in pre-commit hooks
+    - name: create hatch venv
+      shell: bash
+      run: |
+        hatch env create default
+        hatch env create fmt
+        hatch shell default
