@@ -46,7 +46,8 @@ jobs:
         with:
           python-version: ${{ steps.setup-python.outputs.python-version }}
           python-path: ${{ steps.setup-python.outputs.python-path }}
-          cache: true
+          create-docs-env: true
+          cache-docs-env: true
 
       - name: Build
         run: hatch run docs:build

@@ -35,7 +35,10 @@ jobs:
         with:
           python-version: ${{ steps.setup-python.outputs.python-version }}
           python-path: ${{ steps.setup-python.outputs.python-path }}
-          cache: true
+          create-default-env: true
+          cache-default-env: true
+          create-fmt-env: true
+          cache-fmt-env: true
 
       - name: Lint check and type check
         # keep the hook name consistent with `ci.skip` in `.pre-commit-config.yaml`
@@ -65,9 +68,9 @@ jobs:
         uses: ./.github/actions/setup-envs
         with:
           python-version: ${{ steps.setup-python.outputs.python-version }}
-          # # https://github.com/actions/setup-python/blob/e9d6f990972a57673cdb72ec29e19d42ba28880f/docs/advanced-usage.md#environment-variables
           python-path: ${{ steps.setup-python.outputs.python-path }}
-          cache: true
+          create-default-env: true
+          cache-default-env: true
 
       - name: Test
         # Prevent unknown errors from causing long-term blockage of ci during testing
