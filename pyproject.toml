@@ -27,15 +27,16 @@ dynamic = ["version"]
 dependencies = [] # EDIT
 
 [project.optional-dependencies]
+dev = [] # EDIT
 # NOTE: Must use `==` to constrain version for github actions cache working properly
 dev_fmt = [
-    "ruff==0.1.9",
+    "ruff==0.2.0",
     "codespell==2.2.6",
     "tomli",            # tomli needed for `codespell`
 ]
 # NOTE: Must use `==` to constrain version for github actions cache working properly
 dev_test = [
-    "pyright == 1.1.344",
+    "pyright == 1.1.349",
     "pytest==7.4.3",
     "pytest-cov== 4.1.0",
     "pytest-timeout==2.2.0",
@@ -44,11 +45,18 @@ dev_test = [
 dev_docs = [
     "mkdocs-material == 9.5.3",
     "mkdocstrings[python] == 0.24.0",
+    "griffe-inherited-docstrings == 1.1.*",
+    "griffe-pydantic == 1.1.*",
+    "griffe-warnings-deprecated == 1.1.*",
+    # We need black to format code in mkdocstrings,
+    # see https://mkdocstrings.github.io/python/usage/configuration/signatures/#line_length
+    "black == 24.1.1",
     "mkdocs-gen-files == 0.5.0",
     "mkdocs-literate-nav == 0.6.1",
     "mkdocs-section-index == 0.3.8",
     "mkdocs-git-revision-date-localized-plugin == 1.2.2",
     "mkdocs-git-committers-plugin-2 == 2.2.2",
+    "griffe-inherited-docstrings == 1.0.0",
 ]
 
 
@@ -70,6 +78,7 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 # https://hatch.pypa.io/latest/plugins/builder/wheel/#default-file-selection
 # https://hatch.pypa.io/latest/config/build/#packages
+sources = ["src"]
 
 
 [tool.hatch.version]
@@ -87,7 +96,7 @@ check_dirty = false
 
 [tool.hatch.envs.default]
 path = ".venv-default"  # NOTE: Do not change the path, it's used in github action cache
-features = ["dev_test"]
+features = ["dev", "dev_test"]
 
 # NOTE: Do not change the scripts name, it's used in pre-commit local hook
 [tool.hatch.envs.default.scripts]
@@ -128,7 +137,11 @@ build = "mkdocs build"
 docstring-code-format = true
 
 # https://docs.astral.sh/ruff/rules/
-[tool.ruff]
+[tool.ruff.lint]
+preview = true
+explicit-preview-rules = true
+# we use `extend-select` to enable preview rules
+extend-select = ["RUF022"] # unsorted-dunder-all
 select = [
     "E",      # pycodestyle errors
     "W",      # pycodestyle warnings
@@ -184,10 +197,14 @@ ignore = [
 ]
 
 # https://docs.astral.sh/ruff/settings/#pydocstyle
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
-# [tool.ruff.flake8-tidy-imports]
+[tool.ruff.lint.isort]
+known-first-party = ["pyproject_template"] # EDIT
+
+# # EDIT
+# [tool.ruff.lint.flake8-tidy-imports]
 # ban-relative-imports = "all"
 
 
@@ -195,6 +212,8 @@ convention = "google"
 [tool.pyright]
 typeCheckingMode = "strict"
 pythonVersion = "3.8"
+pythonPlatform = "All"
+# rules
 reportUnusedImport = "warning"
 reportUnusedFunction = "warning"
 reportUnusedExpression = "warning"
