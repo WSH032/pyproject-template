@@ -133,7 +133,12 @@ plugins:
               # see: https://mkdocstrings.github.io/python/usage/configuration/general/#preload_modules
               - pyproject_template
             extensions:
+              # https://mkdocstrings.github.io/griffe-inherited-docstrings/
               - griffe_inherited_docstrings
+              # https://mkdocstrings.github.io/griffe-pydantic/
+              - griffe_pydantic
+              # https://mkdocstrings.github.io/griffe-warnings-deprecated/
+              - griffe_warnings_deprecated
             # https://mkdocstrings.github.io/python/usage/configuration/headings/#parameter_headings
             parameter_headings: true
             # https://mkdocstrings.github.io/python/usage/configuration/docstrings/#show_if_no_docstring

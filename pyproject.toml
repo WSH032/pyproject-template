@@ -46,6 +46,8 @@ dev_docs = [
     "mkdocs-material == 9.5.3",
     "mkdocstrings[python] == 0.24.0",
     "griffe-inherited-docstrings == 1.1.*",
+    "griffe-pydantic == 1.1.*",
+    "griffe-warnings-deprecated == 1.1.*",
     # We need black to format code in mkdocstrings,
     # see https://mkdocstrings.github.io/python/usage/configuration/signatures/#line_length
     "black == 24.1.1",
